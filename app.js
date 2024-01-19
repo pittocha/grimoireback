@@ -2,6 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const path = require('path');
+const bookRoutes = require('./routes/Book');
 
 
 const app = express();
@@ -25,5 +26,7 @@ app.use((req, res, next) => {
 app.use((req, res, next) => {
     res.json({ message: 'votre requète à bien été recue !' });
 })
+
+app.use('/api/books', bookRoutes);
 
 module.exports = app;
