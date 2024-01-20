@@ -1,11 +1,11 @@
 const Book = require('../models/Book');
 const fs = require('fs');
 
-exports.getTopRatedBooks = (req, res, next) => {
+exports.getTopRatedBooks = async (req, res, next) => {
     try {
-        const topRatedBooks = Book.find()
-        .sort({ averageRating: -1 })
-        .limit(3);
+        const topRatedBooks = await Book.find()
+        .sort({ averageRating: -1 })//organisation des Books par rating décroissant
+        .limit(3);//limite de la réponse au trois premier livres de la liste
         res.json(topRatedBooks);
     } catch (error) {
         res.status(500).json({
