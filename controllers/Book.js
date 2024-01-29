@@ -2,6 +2,36 @@ const Book = require('../models/Book');
 const fs = require('fs');
 const path = require('path');
 
+exports.rateBook = async (req, res, next) => {
+    const { userId, rating } = req.body;
+    const bookId = req.params.id;
+
+    try {
+        //recherche du livre par Id
+        const book = await Book.findOne({ _id: bookId });
+        if(!book) {
+            return res.status(404).json({ message: 'Livre non trouvé.' });
+        }
+        //vérification si l'utilisateur à déja noté ce livre
+        const existingRating = book.ratings.find(r => r.userId === userId);
+        if (existingRating) {
+            return res.status(400).json({ message: 'Ce livre est déja évalué.' });
+        }
+        //Ajout de la nouvelle note
+        book.ratings.push({ userId, grade: rating });
+        //calcul de la nouvelle note
+        const totalRatings = book.ratings.length;
+        const sumRatings = book.ratings.reduce((acc, cur) => acc + cur.grade, 0);
+        book.averageRating = sumRatings / totalRatings;
+        //enregistrer les modifications dans la base de données.
+        const updatedBook = await book.save();
+        return res.status(200).json(updatedBook);
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ error: 'Erreur serveur' });
+    }
+};
+
 exports.createBook = async (req, res, next) => {
     const bookObject = JSON.parse(req.body.book);
     delete bookObject._id;
