@@ -41,7 +41,7 @@ exports.rateBook = async (req, res, next) => {
         }
         //Ajout de la nouvelle note
         book.ratings.push({ userId, grade: rating });
-        //calcul de la nouvelle note
+        //calcul de la nouvelle note moyenne
         const totalRatings = book.ratings.length;
         const sumRatings = book.ratings.reduce((acc, cur) => acc + cur.grade, 0);
         book.averageRating = sumRatings / totalRatings;
@@ -58,11 +58,13 @@ exports.createBook = async (req, res, next) => {
     const bookObject = JSON.parse(req.body.book);
     delete bookObject._id;
     delete bookObject._userId;
-    const imageUrl = `${req.protocol}://${req.get('host')}/images/${path.basename(req.file.path)}`;
+    const imageUrl = `${req.protocol}://${req.get('host')}/images/${path.basename(req.file.path)}`;//objet permettant de gnérer l'url de l'image
     const book = new Book({
         ...bookObject,
         userId: req.auth.userId,
-        imageUrl: imageUrl
+        imageUrl: imageUrl,
+        ratings: [], //initialise un tableau d'évaluation vide 
+        averageRating: 0 //initialise la note moyenne à 0
     });
     book.save()
     .then(() => res.status(201).json({ message: 'Objet enregistré !' }))
@@ -72,7 +74,7 @@ exports.createBook = async (req, res, next) => {
 exports.deleteBook = (req, res, next) => {
     Book.findOne({ _id: req.params.id })
     .then( book => {
-        if (book.userId != req.auth.userId) {
+        if (book.userId != req.auth.userId) {//vérification de l'identifiant de utilisateur
             res.status(403).json({ message: 'Unauthorized request' });
         } else {
             const filename = book.imageUrl.split('/images')[1];
