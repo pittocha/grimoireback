@@ -5,7 +5,7 @@ const path = require('path');
 exports.modifyBook = (req, res, next) => {
     const bookObject = req.file ? {
         ...JSON.parse(req.body.book),
-        imageUrl: `${req.protocol}://${req.get('host')}/images/${path.basename(req.file.path)}`
+        imageUrl: `${req.protocol}://${req.get('host')}/images/${path.basename(req.file.path)}`//protocol correspond à l'objet de requette(http), path.basename est une fonction qui renvoie la derniere partie du chemin req.file.peth ddéfinit dans sharp
     } : {...req.body};
 
     delete bookObject._userId;
@@ -56,9 +56,9 @@ exports.rateBook = async (req, res, next) => {
 
 exports.createBook = async (req, res, next) => {
     const bookObject = JSON.parse(req.body.book);
-    delete bookObject._id;
-    delete bookObject._userId;
-    const imageUrl = `${req.protocol}://${req.get('host')}/images/${path.basename(req.file.path)}`;//objet permettant de gnérer l'url de l'image
+    delete bookObject._id;//suppression de l'_id de l'objet json pour mongodb qui genere un nouvel _id
+    delete bookObject._userId;//suppression de l'userid de l'objet json pour pouvoir y associé le user id de l'utilisateur qui cré l'odjet
+    const imageUrl = `${req.protocol}://${req.get('host')}/images/${path.basename(req.file.path)}`;//protocol correspond à l'objet de requette(http), path.basename est une fonction qui renvoie la derniere partie du chemin req.file.peth ddéfinit dans sharp
     const book = new Book({
         ...bookObject,
         userId: req.auth.userId,
